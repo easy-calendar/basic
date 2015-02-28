@@ -1,0 +1,39 @@
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="jQuery.js"></script>
+<script type="text/javascript" src="../easy-calendar.js"></script>
+<style type="text/css">
+.gray-font{
+    color:lightgray;
+}
+</style>
+<script type="text/javascript">
+
+$(function(){
+    $("label").text($(".calendar").initCalendar(function(){
+        if(!this.hasClass("gray-font")&&(this.data().date.getDay()==6||this.data().date.getDay()==0)){
+            this.css({"color":"red"});
+        }
+    }));
+    $(".pre").click(function(){
+        $("label").text($(".calendar").preMonth());
+    });
+
+    $(".next").click(function(){
+        $("label").text($(".calendar").nextMonth());
+    });
+
+    $(".calendar").on('click', 'td', function(event){
+        var cell = $(event.currentTarget);
+        console.log(cell.data().date);
+        console.log(cell.data().isCurrentMonth);
+    });
+});
+
+</script>
+<label></label><br>
+<button class="pre">pre</button> <button class="next"> next</button>
+<div class="calendar">
+
+</div>
+
