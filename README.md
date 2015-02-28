@@ -1,5 +1,4 @@
-# basic
-initial version
+# Description
 This is a little calender plugin for jQuery, it is easy to modify its style, it is easy to bind event handler for this plugin, 
 you can bind event handler without config this plugin.
 
