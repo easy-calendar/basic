@@ -2,17 +2,17 @@
 /**
     Author:Jesse.Chen
     Create Date: 2015-02-28
-    Description: This is a little calender plugin for jQuery, it is easy to modify its style, it is easy to bind event handler for this plugin, 
+    Description: This is a little calender plugin for common javascript, it is easy to modify its style, it is easy to bind event handler for this plugin, 
                  you can bind event handler without config this plugin
     License: Free
     Email: xiang19890319@gmail.com
 */
 
-(function($){
+var esayCalendar = (function(){
 
     var _DEFINE = {
         "months":['January','February','March','April','May','June','July','August','September','October','November','December'],
-        "days":["SU","MO","TU","WE","TH","FR","SA"]
+        "days":["MO","TU","WE","TH","FR","SA", "SU"]
     };
 
     var _currentMonth = new Date();
@@ -30,24 +30,32 @@
 
         var table = document.createElement("table");
         var title = document.createElement("tr");
-        $(title).append("<td>MO</td><td>TU</td><td>WE</td><td>TH</td><td>FR</td><td>SA</td><td>SU</td>");
-        $(table).append($(title));
+        _DEFINE.days.forEach(function(item, index, array){
+            var cell = document.createElement("td");
+            cell.appendChild(document.createTextNode(item));
+            title.appendChild(cell);
+        });
+        table.appendChild(title);
         var dateCursor = new Date(_firstDayInCalendar.getFullYear(), _firstDayInCalendar.getMonth(), _firstDayInCalendar.getDate());
         for(var i = 0; i<_row; i++){
-            var currentRow = $("<tr></tr>").appendTo(table);
+            var currentRow = document.createElement("tr");
+            table.appendChild(currentRow);
             for(var j=0; j<7; j++){
                 var currentDate = new Date(dateCursor.getFullYear(), dateCursor.getMonth(), dateCursor.getDate());
                 var isCurrentMonth = (currentDate.getMonth() == _currentMonth.getMonth());
-                var dayCell = $("<td>"+currentDate.getDate()+"</td>").data({"date":currentDate,"isCurrentMonth":isCurrentMonth});
-                currentRow.append(dayCell);
+                var dayCell = document.createElement('td');
+                dayCell.appendChild(document.createTextNode(currentDate.getDate()));
+                dayCell.dataset.date=currentDate;
+                dayCell.dataset.isCurrentMonth=isCurrentMonth;
+                currentRow.appendChild(dayCell);
                 if(!isCurrentMonth){
-                    dayCell.addClass("gray-font");
+                    dayCell.classList.add("gray-font");
                 }
                 _callBackForEachCell.call(dayCell);
                 dateCursor.setTime(dateCursor.getTime()+1000*60*60*24);
             }
         }
-        _dom.append($(table));
+        _dom.appendChild(table);
     }
 
     function _calculateFirstDay(date){
@@ -57,18 +65,21 @@
         }
     }
 
-    function next(callbackForEachCell){
-        var dom = $(this);
+    function next(dom, callbackForEachCell){
         if(callbackForEachCell){
             _callBackForEachCell = callbackForEachCell;
         }
-        if(!dom.data().currentMonth){
+        if(!dom.dataset.currentMonth){
             return;
         }
         _dom = dom;
         _row = 0;
-        dom.empty();
-        var currentMonth = dom.data().currentMonth, year, month;
+        //empty dom
+        for(var nodeIndex in dom.childNodes){
+            var item = dom.childNodes.item(nodeIndex);
+            item?dom.removeChild(item):"";
+        }
+        var currentMonth = new Date(dom.dataset.currentMonth), year, month;
         if(currentMonth.getMonth() == 11){
             year = currentMonth.getFullYear()+1;
             month = 0;
@@ -80,18 +91,21 @@
         return year+"-"+_DEFINE.months[month];
     }
 
-    function pre(callbackForEachCell){
-        var dom = $(this);
+    function pre(dom, callbackForEachCell){
         if(callbackForEachCell){
             _callBackForEachCell = callbackForEachCell;
         }
-        if(!dom.data().currentMonth){
+        if(!dom.dataset.currentMonth){
             return;
         }
         _dom = dom;
         _row = 0;
-        dom.empty();
-        var currentMonth = dom.data().currentMonth, year, month;
+        //empty dom
+        for(var nodeIndex in dom.childNodes){
+            var item = dom.childNodes.item(nodeIndex);
+            item?dom.removeChild(item):"";
+        }
+        var currentMonth = new Date(dom.dataset.currentMonth), year, month;
         if(currentMonth.getMonth() == 0){
             year = currentMonth.getFullYear()-1;
             month = 11;
@@ -107,7 +121,7 @@
         _currentMonth.setFullYear(year);
         _currentMonth.setMonth(month);
         _currentMonth.setDate(1);
-        _dom.data({"currentMonth":_currentMonth});
+        _dom.dataset.currentMonth = _currentMonth;
         _calculateFirstDay(_currentMonth);
         var lastDayOfCurrentMonth = new Date();
         if(month==11){
@@ -136,8 +150,8 @@
         _graphCalender();
     }
 
-    var calendar = function(callbackForEachCell){
-        _dom = $(this);
+    var calendar = function(dom, callbackForEachCell){
+        _dom = dom;
         if(callbackForEachCell){
             _callBackForEachCell = callbackForEachCell;
         }
@@ -149,7 +163,10 @@
         _initCurrentMonth(year, month);
         return year+"-"+_DEFINE.months[month];
     };
-    $.fn.initCalendar = calendar;
-    $.fn.nextMonth = next;
-    $.fn.preMonth = pre;
-})(jQuery);
+
+    return {
+            "initCalendar":calendar,
+            "nextMonth":next,
+            "preMonth":pre
+            };
+})();
